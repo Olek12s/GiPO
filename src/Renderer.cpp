@@ -252,12 +252,12 @@ void Renderer::init() {
     skyboxShader = Shader("skybox.vex", "skybox.frag"); // wczytywanie shaderow skyboxa
 
     std::vector<std::string> faces = {
-        "C:/Users/Oleki/CLionProjects/GiPO/skybox/right.jpg",  // +X
-        "C:/Users/Oleki/CLionProjects/GiPO/skybox/left.jpg",   // -X
-        "C:/Users/Oleki/CLionProjects/GiPO/skybox/top.jpg",    // +Y
-        "C:/Users/Oleki/CLionProjects/GiPO/skybox/bottom.jpg", // -Y
-        "C:/Users/Oleki/CLionProjects/GiPO/skybox/front.jpg",  // +Z
-        "C:/Users/Oleki/CLionProjects/GiPO/skybox/back.jpg"    // -Z
+        "../skybox/right.jpg",      // +X
+            "../skybox/left.jpg",   // -X
+            "../skybox/top.jpg",    // +Y
+            "../skybox/bottom.jpg", // -Y
+            "../skybox/front.jpg",  // +Z
+            "../skybox/back.jpg"    // -Z
     };
     cubemapTexture = loadCubemap(faces);
     skyboxShader.use();
