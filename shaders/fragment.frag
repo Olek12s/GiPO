@@ -2,13 +2,15 @@
 
 in vec3 Normal;
 in vec3 FragPos;
+in vec2 TexCoords;    // offset dla animacji
 
 out vec4 FragColor;
 
 uniform vec3 lightColor;
-uniform vec3 objectColor;
+//uniform vec3 objectColor;
 uniform vec3 lightPos;  // pozycja światła
 uniform vec3 viewPos;   // pozycja kamery
+uniform sampler2D texture1;  // txt 2D
 
 void main() {
     //FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -32,9 +34,10 @@ void main() {
     float specularComponent = pow(max(dot(viewDir, reflection), 0.0), specularShininess);
     vec3 specular = specularIntensity * specularComponent * lightColor;
 
-    //vec3 result = ambient * objectColor;    // kolor światła * kolor obiektu
-    //vec3 result = (ambient + diffuse) * objectColor;    // kolor światła * kolor obiektu
-    vec3 result = (ambient + diffuse + specular) * objectColor;    // kolor światła * kolor obiektu
+    vec3 texColor = texture(texture1, TexCoords).rgb;    // kolor na podstawie stanu animacji UV
+
+    //vec3 result = (ambient + diffuse + specular) * objectColor;    // kolor światła * kolor obiektu
+    vec3 result = (ambient + diffuse + specular) * texColor;
 
     FragColor = vec4(result, 1.0);
 }

@@ -139,6 +139,10 @@ unsigned int ID;
     void setUniformVec3(const std::string& name, float x, float y, float z) const {
         glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
     }
+
+    void setUniformVec2(const std::string& name, float x, float y) const {
+        glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
+    }
 };
 
 

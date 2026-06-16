@@ -18,6 +18,7 @@ public:
     Shader shader;
     Shader skyboxShader;
     unsigned int cubemapTexture;
+    unsigned int objectTexture;
     Camera camera;
     // unsigned int VBO;   // Vertex Buffer Object
     // unsigned int VAO;   // Vertex Array Object
