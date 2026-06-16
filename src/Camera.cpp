@@ -5,7 +5,7 @@
 #include "Camera.h"
 
 Camera::Camera() {
-    position = glm::vec3(0.0f, 0.0f, 3.0f); // (0,0,0 środek ekranu)
+    position = glm::vec3(0.0f, 0.0f, 0.0f); // (0,0,0 środek ekranu)
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);  // Globalna oś Y
     yaw = -90.0f; // Zwrot w stronę -Z
     pitch = 0.0f;

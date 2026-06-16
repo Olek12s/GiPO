@@ -16,13 +16,15 @@ class Renderer {
 public:
     GLFWwindow* window;
     Shader shader;
+    Shader skyboxShader;
+    unsigned int cubemapTexture;
     Camera camera;
     // unsigned int VBO;   // Vertex Buffer Object
     // unsigned int VAO;   // Vertex Array Object
 
     Frame frame;
-    unsigned int VAO_tri, VAO_rect, VAO_sphere, VAO_cylinder, VAO_cone;
-    unsigned int VBO_tri, VBO_rect, VBO_sphere, VBO_cylinder, VBO_cone;
+    unsigned int VAO_tri, VAO_rect, VAO_sphere, VAO_cylinder, VAO_cone, VAO_skybox;
+    unsigned int VBO_tri, VBO_rect, VBO_sphere, VBO_cylinder, VBO_cone, VBO_skybox;
 
     float lastFrame = 0;
     inline static float M_PI = 3.14159;
@@ -54,6 +56,9 @@ public:
     std::vector<float> generateSphereGeometry(float radius, int sectorCount, int stackCount);   // kula - sectorCount - liczba trójkątów w podstawie
     std::vector<float> generateCylinderGeometry(float radius, float height, int sectorCount);   // cylinder
     std::vector<float> generateConeGeometry(float radius, float height, int sectorCount);       // stożek
+
+    unsigned int loadTexture(char const* path);                  // tekstura 2D
+    unsigned int loadCubemap(std::vector<std::string> faces);   // tekstura cubemap
 
     int sphereVertexCount;
     int cylinderVertexCount;

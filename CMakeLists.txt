@@ -17,7 +17,8 @@ add_executable(GiPO src/main.cpp
         include/Camera.h
         ${IMGUI_SOURCES}
         src/Frame.cpp
-        include/Frame.h)
+        include/Frame.h
+        include/stb_image.cpp)
 
 target_include_directories(GiPO PRIVATE
         "${CMAKE_SOURCE_DIR}/include"

@@ -1,7 +1,7 @@
 //
 // Created by Oleki on 16.06.2026.
 //
-
+#include "stb_image.h"
 #include "../include/Renderer.h"
 
 void Renderer::init() {
@@ -147,6 +147,86 @@ void Renderer::init() {
     glEnableVertexAttribArray(1);
     // ###### stożek ###### //
 
+    // ###### skybox ###### //
+    std::vector<float> skyboxVertices = {
+        // back face
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        // front face
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        // left face
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+
+        // right face
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+
+         1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+
+        // bottom face
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+
+        // top face
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f
+    };
+    glGenVertexArrays(1, &VAO_skybox);
+    glGenBuffers(1, &VBO_skybox);
+
+    glBindVertexArray(VAO_skybox);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_skybox);
+
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        skyboxVertices.size() * sizeof(float),
+        skyboxVertices.data(),
+        GL_STATIC_DRAW
+    );
+
+    glVertexAttribPointer(
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        3 * sizeof(float),
+        (void*)0
+    );
+    glEnableVertexAttribArray(0);
+    // ###### skybox ###### //
+
     // VAO
     // glGenVertexArrays(1, &VAO);
     // glBindVertexArray(VAO); // aktywacja VAO
@@ -169,6 +249,20 @@ void Renderer::init() {
     // glEnableVertexAttribArray(0);
 
     shader = Shader("vertex.vex", "fragment.frag");  // wczytywanie shaderow
+    skyboxShader = Shader("skybox.vex", "skybox.frag"); // wczytywanie shaderow skyboxa
+
+    std::vector<std::string> faces = {
+        "C:/Users/Oleki/CLionProjects/GiPO/skybox/right.jpg",  // +X
+        "C:/Users/Oleki/CLionProjects/GiPO/skybox/left.jpg",   // -X
+        "C:/Users/Oleki/CLionProjects/GiPO/skybox/top.jpg",    // +Y
+        "C:/Users/Oleki/CLionProjects/GiPO/skybox/bottom.jpg", // -Y
+        "C:/Users/Oleki/CLionProjects/GiPO/skybox/front.jpg",  // +Z
+        "C:/Users/Oleki/CLionProjects/GiPO/skybox/back.jpg"    // -Z
+    };
+    cubemapTexture = loadCubemap(faces);
+    skyboxShader.use();
+    skyboxShader.setUniformInt("skybox", 0);
+
     shader.use();
 }
 
@@ -251,11 +345,32 @@ void Renderer::render() {
     frame.roll = 0.0f;
     frame.yaw = 0.0f;
     drawSphere();
+
+
+    // skybox
+    glDepthFunc(GL_LEQUAL); // less or equal - 1.0 == 1.0 dla skybox
+    skyboxShader.use();
+    glm::mat4 viewMatrixSkybox = glm::mat4(glm::mat3(camera.getViewMatrix()));  // usunięcie translacji
+    //glm::mat4 viewMatrixSkybox = camera.getViewMatrix();
+    //glm::mat4 viewMatrixSkybox = glm::scale(glm::mat4(1.0f), glm::vec3(500.0f));
+
+    //Wysłanie macierzy do shadera skyboxa
+    skyboxShader.setUniformMat4("view", viewMatrixSkybox);
+    skyboxShader.setUniformMat4("projection", projectionMatrix);
+
+    // aktywacja tekstury, bindowanie skyboxa
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+    // rysowanie
+    glBindVertexArray(VAO_skybox);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+
+    glDepthFunc(GL_LESS);   // eless
+
     // ####### RYSOWANIE ###### //
 
-
-    // renderuj trójkąty na podstawie określonego glVertexAttribPointer(...)
-    //glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 2);
 
     glfwSwapBuffers(window);   // double buffer
     glfwPollEvents();   // wydarzenia / eventy
@@ -458,4 +573,68 @@ std::vector<float> Renderer::generateConeGeometry(float radius, float height, in
     }
 
     return vertices;
+}
+
+unsigned int Renderer::loadTexture(char const* path) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, channelsInFile;   // ilość kanalów
+    stbi_set_flip_vertically_on_load(true);     // tekstury mają Y w lewym górnym rogu - openGL w lewym dolnym
+
+    unsigned char *data = stbi_load(path, &width, &height, &channelsInFile, 0);
+    if (data) {
+        GLenum format;
+        if (channelsInFile == 1) format = GL_RED;
+        else if (channelsInFile == 3) format = GL_RGB;
+        else if (channelsInFile == 4) format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);   // wyslanie obrazu do GPU
+        glGenerateMipmap(GL_TEXTURE_2D);    // generowanie mipmap
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   // repeat w osi X
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);   // repeat w osi Y
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    } else {
+        std::cout << "Błąd przy wczytywaniu tekstury: " << path << "\n";
+        stbi_image_free(data);
+    }
+    return textureID;
+}
+
+unsigned int Renderer::loadCubemap(std::vector<std::string> faces) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(false);
+
+    for (unsigned int i = 0; i < faces.size(); i++) {
+        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); // wyslanie obrazu do GPU
+            stbi_image_free(data);
+        } else {
+            std::cout << "Błąd przy wczytywaniu tekstury cubemapy: " << faces[i] << std::endl;
+            stbi_image_free(data);
+        }
+    }
+
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); // wygładzanie szwów cubemapy
+    // Minification Filter (filtr pomniejszania)
+    // gl_linear - usrednienienie na podstawie sasiadow
+    // gl_nearest - najblizszy sasiad
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // wygładza krawędzie pikseli, gdy podchodzimy blisko ściany
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // blokuje współrzędną na krawędzi w osi X, zamiast ją powtarzać
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // blokuje współrzędną na krawędzi w osi Y, zamiast ją powtarzać
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); // blokuje współrzędną na krawędzi w osi Z, zamiast ją powtarzać
+
+    return textureID;
 }
