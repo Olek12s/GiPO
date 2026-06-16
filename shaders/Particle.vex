@@ -1,0 +1,12 @@
+#version 330 core
+layout (location = 0) in vec2 position;
+
+uniform mat4 model;         // obrót i skala kamery (w tym programie nieużywane)
+uniform mat4 view;          // pozycja kamery
+uniform mat4 projection;    // perspektywa
+
+void main()
+{
+                    // P * V * M
+    gl_Position = projection * view * model * vec4(position, 0.0, 1.0);
+}
