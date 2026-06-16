@@ -261,7 +261,7 @@ void Renderer::init() {
     };
     cubemapTexture = loadCubemap(faces);
     skyboxShader.use();
-    skyboxShader.setUniformInt("skybox", 0);
+    //skyboxShader.setUniformInt("skybox", 0);
 
     shader.use();
 }
@@ -350,7 +350,7 @@ void Renderer::render() {
     // skybox
     glDepthFunc(GL_LEQUAL); // less or equal - 1.0 == 1.0 dla skybox
     skyboxShader.use();
-    glm::mat4 viewMatrixSkybox = glm::mat4(glm::mat3(camera.getViewMatrix()));  // usunięcie translacji
+    glm::mat4 viewMatrixSkybox = glm::mat4(glm::mat3(camera.getViewMatrix()));  // usunięcie translacji (pozycji kamery) z macierzy View poprzez translacje(T) macierzy
     //glm::mat4 viewMatrixSkybox = camera.getViewMatrix();
     //glm::mat4 viewMatrixSkybox = glm::scale(glm::mat4(1.0f), glm::vec3(500.0f));
 
