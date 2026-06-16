@@ -22,40 +22,130 @@ void Renderer::init() {
 
     //glfwSwapInterval(0);    // 0 = VSync Off
     glViewport(0, 0, 800, 600); // obszar view-Port
+    glEnable(GL_DEPTH_TEST);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);  // window resize callback
     glfwSetCursorPosCallback(window, mouse_callback);                   // mouse coursor callback
     glfwSetWindowUserPointer(window, this);                       // wskaźnik na obecne okno
 
 
-    std::vector<float> rectangleVertices = { // kształt 2D: XY XY XY XY XY XY
-        -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f,
-         0.5f,  0.5f, -0.5f, 0.5f, -0.5f, -0.5f
+    // ###### prostokąt ###### //
+
+    // XYZ  Nx, Ny, Nz
+    std::vector<float> rectangleVertices = {
+        // XYZ(3)             // Normalne(3)
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+
+         0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f
     };
     glGenVertexArrays(1, &VAO_rect);
     glGenBuffers(1, &VBO_rect);
     glBindVertexArray(VAO_rect);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_rect);
     glBufferData(GL_ARRAY_BUFFER, rectangleVertices.size() * sizeof(float), rectangleVertices.data(), GL_STATIC_DRAW);
+
+    // wierzchołki
     glVertexAttribPointer(0,
-        2,
+        3,
         GL_FLOAT,
         GL_FALSE,
-        2 * sizeof(float),
+        6 * sizeof(float),
         (void*)0);
     glEnableVertexAttribArray(0);
 
+    // normalne
+    glVertexAttribPointer(1
+        , 3,
+        GL_FLOAT,
+        GL_FALSE,
+        6 * sizeof(float),
+        (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-    std::vector<float> triangleVertices = { // kształt 2D: XY XY XY
-        -0.5f, -0.5f,   0.5f, -0.5f,   0.0f,  0.5f
+    // ###### prostokąt ###### //
+
+
+    // ###### trójkąt ###### //
+
+    std::vector<float> triangleVertices = {
+        // XYZ(3)                 // Normalne(3)
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f
     };
     glGenVertexArrays(1, &VAO_tri);
     glGenBuffers(1, &VBO_tri);
     glBindVertexArray(VAO_tri);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_tri);
     glBufferData(GL_ARRAY_BUFFER, triangleVertices.size() * sizeof(float), triangleVertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
+    // wierzchołki
+    glVertexAttribPointer(
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        6 * sizeof(float),
+        (void*)0);
     glEnableVertexAttribArray(0);
+
+    // normalne
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        6 * sizeof(float),
+        (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // ###### trójkąt ###### //
+
+    // ###### kula ###### //
+    std::vector<float> sphereVertices = generateSphereGeometry(0.5f, 36, 18);
+    sphereVertexCount = sphereVertices.size() / 6;
+    glGenVertexArrays(1, &VAO_sphere);
+    glGenBuffers(1, &VBO_sphere);
+    glBindVertexArray(VAO_sphere);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_sphere);
+    glBufferData(GL_ARRAY_BUFFER, sphereVertices.size() * sizeof(float), sphereVertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);   // wierzchołki
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))); // normalne
+    glEnableVertexAttribArray(1);
+    // ###### kula ###### //
+
+    // ###### cylinder ###### //
+    std::vector<float> cylinderVertices = generateCylinderGeometry(0.5f, 1.0f, 36);
+    cylinderVertexCount = cylinderVertices.size() / 6;
+    glGenVertexArrays(1, &VAO_cylinder);
+    glGenBuffers(1, &VBO_cylinder);
+    glBindVertexArray(VAO_cylinder);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_cylinder);
+    glBufferData(GL_ARRAY_BUFFER, cylinderVertices.size() * sizeof(float), cylinderVertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);   // wierzchołki
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))); // normalne
+    glEnableVertexAttribArray(1);
+    // ###### cylinder ###### //
+
+    // ###### stożek ###### //
+    std::vector<float> coneVertices = generateConeGeometry(0.5f, 1.0f, 36);
+    coneVertexCount = coneVertices.size() / 6;
+    glGenVertexArrays(1, &VAO_cone);
+    glGenBuffers(1, &VBO_cone);
+    glBindVertexArray(VAO_cone);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_cone);
+    glBufferData(GL_ARRAY_BUFFER, coneVertices.size() * sizeof(float), coneVertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);   // wierzchołki
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))); // normalne
+    glEnableVertexAttribArray(1);
+    // ###### stożek ###### //
 
     // VAO
     // glGenVertexArrays(1, &VAO);
@@ -78,7 +168,7 @@ void Renderer::init() {
     // );
     // glEnableVertexAttribArray(0);
 
-    shader = Shader("Particle.vex", "Particle.frag");  // wczytywanie shaderow
+    shader = Shader("vertex.vex", "fragment.frag");  // wczytywanie shaderow
     shader.use();
 }
 
@@ -107,11 +197,17 @@ void Renderer::render() {
     camera.update(window, deltaTime);   // klawiatura
 
     glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // bufor kolorów i bufor głębokości
 
     //glBindBuffer(GL_ARRAY_BUFFER, VBO);
     //glBindVertexArray(VAO);
     shader.use();
+
+    shader.setUniformVec3("lightColor", 1.0f, 1.0f, 1.0f);  // biały ambient light
+    shader.setUniformVec3("objectColor", 0.1f, 0.85f, 0.15f); // wszystkie obiekty są 1 barwy
+    shader.setUniformVec3("lightPos", 1.0f, 0.0f, 0.0f);    // umiejscowenie źródła światła
+    shader.setUniformVec3("viewPos", camera.position.x, camera.position.y, camera.position.z);  // pozycja kamery (specular lighting)
+
 
     //glm::mat4 modelMatrix(1.0f);    // macierz jednostkowa
     glm::mat4 viewMatrix = camera.getViewMatrix();
@@ -129,18 +225,32 @@ void Renderer::render() {
 
     // ####### RYSOWANIE ###### //
     //frame.position = glm::vec3(-1.0f, 0.0f, 0.0f);
-    frame.position = glm::vec3(-1 - glm::cos(currentFrame * 1.f) * 1.f, 0.0f, 0.0f);
-    frame.yaw = 0.0f;
+    frame.position = glm::vec3(-4 - glm::cos(currentFrame * 1.f) * 1.f, 0.0f, 0.0f);
+    frame.yaw = glm::sin(currentFrame * 2.f) * 60.f;
     frame.roll = glm::sin(currentFrame * 5.f) * 45.f;  // animacja obrotu (mnożnik określa maksymalny kąt wychylenia)
-    frame.clamp();
+    //frame.clamp();
     drawRectangle();
 
-    frame.position = glm::vec3(1.0f, 0.0f, 0.0f);
+    frame.position = glm::vec3(1.0f, 2.0f, 0.0f);
     frame.roll = 0.0f;
     frame.yaw = currentFrame * 165.0f;
-    frame.clamp();
+    //frame.clamp();
     drawTriangle();
 
+    frame.position = glm::vec3(0.0f, 0.0f, -2.5f);
+    frame.roll = currentFrame * 6.f;
+    frame.yaw = currentFrame * 9.f;
+    drawCone();
+
+    frame.position = glm::vec3(3.f, 0.0f, 0.0f);
+    frame.roll = 0.0f;
+    frame.yaw = 0.0f;
+    drawCylinder();
+
+    frame.position = glm::vec3(-0.0f, -3.f, -0.0f);
+    frame.roll = 0.0f;
+    frame.yaw = 0.0f;
+    drawSphere();
     // ####### RYSOWANIE ###### //
 
 
@@ -171,4 +281,181 @@ void Renderer::drawTriangle() {
     // przełączamy się na wierzchołki tego obiektu
     glBindVertexArray(VAO_tri);
     glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+void Renderer::drawSphere() {
+    glm::mat4 modelMatrix = frame.getMatrix();
+    unsigned int modelLoc = glGetUniformLocation(shader.ID, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+    glBindVertexArray(VAO_sphere);
+    glDrawArrays(GL_TRIANGLES, 0, sphereVertexCount);
+}
+
+void Renderer::drawCylinder() {
+    glm::mat4 modelMatrix = frame.getMatrix();
+    unsigned int modelLoc = glGetUniformLocation(shader.ID, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+    glBindVertexArray(VAO_cylinder);
+    glDrawArrays(GL_TRIANGLES, 0, cylinderVertexCount);
+}
+
+void Renderer::drawCone() {
+    glm::mat4 modelMatrix = frame.getMatrix();
+    unsigned int modelLoc = glGetUniformLocation(shader.ID, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+    glBindVertexArray(VAO_cone);
+    glDrawArrays(GL_TRIANGLES, 0, coneVertexCount);
+}
+
+std::vector<float> Renderer::generateSphereGeometry(float radius, int sectorCount, int stackCount) {
+    std::vector<float> vertices;
+    float x, y, z, xy;
+    float nx, ny, nz, lengthInv = 1.0f / radius;
+    float sectorStep = 2 * Renderer::M_PI / sectorCount;
+    float stackStep = Renderer::M_PI / stackCount;
+    float sectorAngle, stackAngle;
+
+    std::vector<float> tempVertices;
+    std::vector<float> tempNormals;
+
+    for (int i = 0; i <= stackCount; ++i) {
+        stackAngle = Renderer::M_PI / 2 - i * stackStep;
+        xy = radius * cosf(stackAngle);
+        z = radius * sinf(stackAngle);
+
+        for (int j = 0; j <= sectorCount; ++j) {
+            sectorAngle = j * sectorStep;
+            x = xy * cosf(sectorAngle);
+            y = xy * sinf(sectorAngle);
+
+            tempVertices.push_back(x);
+            tempVertices.push_back(y);
+            tempVertices.push_back(z);
+
+            nx = x * lengthInv;
+            ny = y * lengthInv;
+            nz = z * lengthInv;
+            tempNormals.push_back(nx);
+            tempNormals.push_back(ny);
+            tempNormals.push_back(nz);
+        }
+    }
+
+    for (int i = 0; i < stackCount; ++i) {
+        int k1 = i * (sectorCount + 1);
+        int k2 = k1 + sectorCount + 1;
+
+        for (int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
+            if (i != 0) {
+                vertices.push_back(tempVertices[k1 * 3]); vertices.push_back(tempVertices[k1 * 3 + 1]); vertices.push_back(tempVertices[k1 * 3 + 2]);
+                vertices.push_back(tempNormals[k1 * 3]); vertices.push_back(tempNormals[k1 * 3 + 1]); vertices.push_back(tempNormals[k1 * 3 + 2]);
+
+                vertices.push_back(tempVertices[k2 * 3]); vertices.push_back(tempVertices[k2 * 3 + 1]); vertices.push_back(tempVertices[k2 * 3 + 2]);
+                vertices.push_back(tempNormals[k2 * 3]); vertices.push_back(tempNormals[k2 * 3 + 1]); vertices.push_back(tempNormals[k2 * 3 + 2]);
+
+                vertices.push_back(tempVertices[(k1 + 1) * 3]); vertices.push_back(tempVertices[(k1 + 1) * 3 + 1]); vertices.push_back(tempVertices[(k1 + 1) * 3 + 2]);
+                vertices.push_back(tempNormals[(k1 + 1) * 3]); vertices.push_back(tempNormals[(k1 + 1) * 3 + 1]); vertices.push_back(tempNormals[(k1 + 1) * 3 + 2]);
+            }
+
+            if (i != (stackCount - 1)) {
+                vertices.push_back(tempVertices[(k1 + 1) * 3]); vertices.push_back(tempVertices[(k1 + 1) * 3 + 1]); vertices.push_back(tempVertices[(k1 + 1) * 3 + 2]);
+                vertices.push_back(tempNormals[(k1 + 1) * 3]); vertices.push_back(tempNormals[(k1 + 1) * 3 + 1]); vertices.push_back(tempNormals[(k1 + 1) * 3 + 2]);
+
+                vertices.push_back(tempVertices[k2 * 3]); vertices.push_back(tempVertices[k2 * 3 + 1]); vertices.push_back(tempVertices[k2 * 3 + 2]);
+                vertices.push_back(tempNormals[k2 * 3]); vertices.push_back(tempNormals[k2 * 3 + 1]); vertices.push_back(tempNormals[k2 * 3 + 2]);
+
+                vertices.push_back(tempVertices[(k2 + 1) * 3]); vertices.push_back(tempVertices[(k2 + 1) * 3 + 1]); vertices.push_back(tempVertices[(k2 + 1) * 3 + 2]);
+                vertices.push_back(tempNormals[(k2 + 1) * 3]); vertices.push_back(tempNormals[(k2 + 1) * 3 + 1]); vertices.push_back(tempNormals[(k2 + 1) * 3 + 2]);
+            }
+        }
+    }
+    return vertices;
+}
+
+std::vector<float> Renderer::generateCylinderGeometry(float radius, float height, int sectorCount) {
+    std::vector<float> vertices;
+    float sectorStep = 2 * Renderer::M_PI / sectorCount;
+    float halfHeight = height / 2.0f;
+
+    // Boki
+    for (int i = 0; i < sectorCount; ++i) {
+        float angle1 = i * sectorStep;
+        float angle2 = (i + 1) * sectorStep;
+
+        float x1 = radius * cos(angle1), z1 = radius * sin(angle1);
+        float x2 = radius * cos(angle2), z2 = radius * sin(angle2);
+
+        // Normalne dla boku
+        float nx1 = cos(angle1), nz1 = sin(angle1);
+        float nx2 = cos(angle2), nz2 = sin(angle2);
+
+        // Trójkąt 1
+        vertices.insert(vertices.end(), {x1, -halfHeight, z1, nx1, 0.0f, nz1});
+        vertices.insert(vertices.end(), {x2, -halfHeight, z2, nx2, 0.0f, nz2});
+        vertices.insert(vertices.end(), {x1, halfHeight, z1, nx1, 0.0f, nz1});
+
+        // Trójkąt 2
+        vertices.insert(vertices.end(), {x1, halfHeight, z1, nx1, 0.0f, nz1});
+        vertices.insert(vertices.end(), {x2, -halfHeight, z2, nx2, 0.0f, nz2});
+        vertices.insert(vertices.end(), {x2, halfHeight, z2, nx2, 0.0f, nz2});
+    }
+
+    // Podstawy
+    for (int i = 0; i < sectorCount; ++i) {
+        float angle1 = i * sectorStep;
+        float angle2 = (i + 1) * sectorStep;
+
+        float x1 = radius * cos(angle1), z1 = radius * sin(angle1);
+        float x2 = radius * cos(angle2), z2 = radius * sin(angle2);
+
+        // Górna (Normalna +Y)
+        vertices.insert(vertices.end(), {0.0f, halfHeight, 0.0f, 0.0f, 1.0f, 0.0f});
+        vertices.insert(vertices.end(), {x1, halfHeight, z1, 0.0f, 1.0f, 0.0f});
+        vertices.insert(vertices.end(), {x2, halfHeight, z2, 0.0f, 1.0f, 0.0f});
+
+        // Dolna (Normalna -Y)
+        vertices.insert(vertices.end(), {0.0f, -halfHeight, 0.0f, 0.0f, -1.0f, 0.0f});
+        vertices.insert(vertices.end(), {x2, -halfHeight, z2, 0.0f, -1.0f, 0.0f});
+        vertices.insert(vertices.end(), {x1, -halfHeight, z1, 0.0f, -1.0f, 0.0f});
+    }
+
+    return vertices;
+}
+
+std::vector<float> Renderer::generateConeGeometry(float radius, float height, int sectorCount) {
+    std::vector<float> vertices;
+    float sectorStep = 2 * Renderer::M_PI / sectorCount;
+    float halfHeight = height / 2.0f;
+
+    // Normalna ściany
+    float ny = radius / sqrt(radius*radius + height*height);
+
+    for (int i = 0; i < sectorCount; ++i) {
+        float angle1 = i * sectorStep;
+        float angle2 = (i + 1) * sectorStep;
+
+        float x1 = radius * cos(angle1), z1 = radius * sin(angle1);
+        float x2 = radius * cos(angle2), z2 = radius * sin(angle2);
+
+        float nx1 = cos(angle1), nz1 = sin(angle1);
+        float nx2 = cos(angle2), nz2 = sin(angle2);
+
+        float nx_avg = (nx1 + nx2) / 2.0f;
+        float nz_avg = (nz1 + nz2) / 2.0f;
+
+        // Bok (trójkąt od podstawy do wierzchołka)
+        vertices.insert(vertices.end(), {x1, -halfHeight, z1, nx1, ny, nz1});
+        vertices.insert(vertices.end(), {x2, -halfHeight, z2, nx2, ny, nz2});
+        vertices.insert(vertices.end(), {0.0f, halfHeight, 0.0f, nx_avg, ny, nz_avg}); // Szczyt
+
+        // Podstawa (Normalna -Y)
+        vertices.insert(vertices.end(), {0.0f, -halfHeight, 0.0f, 0.0f, -1.0f, 0.0f});
+        vertices.insert(vertices.end(), {x2, -halfHeight, z2, 0.0f, -1.0f, 0.0f});
+        vertices.insert(vertices.end(), {x1, -halfHeight, z1, 0.0f, -1.0f, 0.0f});
+    }
+
+    return vertices;
 }
